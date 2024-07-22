@@ -1,9 +1,37 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { UsersController } from './controllers/users/users.controller';
 import { UsersService } from './services/users/users.service';
+import { ExampleMiddleware } from './middlewares/example/example.middleware';
+import { AnotherMiddleware } from './middlewares/another/another.middleware';
 
 @Module({
   controllers: [UsersController],
-  providers: [UsersService]
+  providers: [UsersService],
 })
-export class UsersModule {}
+export class UsersModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(ExampleMiddleware)
+      .forRoutes(
+        {
+          path: 'users',
+          method: RequestMethod.GET,
+        },
+        {
+          path: 'users/:id',
+          method: RequestMethod.GET,
+        },
+      )
+      .apply(AnotherMiddleware)
+      .forRoutes(
+        {
+          path: 'users',
+          method: RequestMethod.GET,
+        },
+        {
+          path: 'users/:id',
+          method: RequestMethod.GET,
+        },
+      );
+  }
+}
